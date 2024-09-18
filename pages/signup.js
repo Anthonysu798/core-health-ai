@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 
@@ -36,14 +36,38 @@ export default function Signup() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     const newErrors = validateForm();
     if (Object.keys(newErrors).length === 0) {
-      // Form is valid, proceed with signup
-      console.log('Form is valid, submitting:', formData);
-      // Add your signup logic here
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+
+        if (res.ok) {
+          const result = await signIn('credentials', {
+            redirect: false,
+            email: formData.email,
+            password: formData.password,
+          });
+
+          if (result.error) {
+            setErrors({ submit: result.error });
+          } else {
+            router.push('/');
+          }
+        } else {
+          const data = await res.json();
+          setErrors({ submit: data.error || 'Something went wrong' });
+        }
+      } catch (error) {
+        console.error(error);
+        setErrors({ submit: 'An error occurred. Please try again.' });
+      }
     } else {
       setErrors(newErrors);
     }
