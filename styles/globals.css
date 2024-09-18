@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-background text-foreground min-h-screen;
+  @apply text-foreground min-h-screen;
 }
 
 @layer utilities {
