@@ -1,8 +1,29 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from 'next/router';
 
 const Navbar = () => {
+  const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const isDashboard = router.pathname === '/dashboard';
+
+  const navItems = isDashboard
+    ? [
+        { name: 'Dashboard', href: '/dashboard' },
+        { name: 'Progress', href: '/progress' },
+        { name: 'Fitness Plan', href: '/fitness-plan' },
+        { name: 'Community', href: '/community' },
+        { name: 'AI Assistant', href: '/ai-integrations' },
+      ]
+    : [
+        { name: 'Home', href: '/' },
+        { name: 'Objectives', href: '/#objectives' },
+        { name: 'Current Needs', href: '/#current-needs' },
+        { name: 'Why Substantial', href: '/#why-substantial' },
+      ];
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-md">
@@ -14,18 +35,28 @@ const Navbar = () => {
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
-                <Link href="/" className="text-purple-600 hover:text-purple-800 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Home</Link>
-                <Link href="#objectives" className="text-purple-600 hover:text-purple-800 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Objectives</Link>
-                <Link href="#current-needs" className="text-purple-600 hover:text-purple-800 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Current Needs</Link>
-                <Link href="#why-substantial" className="text-purple-600 hover:text-purple-800 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Why Substantial</Link>
+                {navItems.map((item) => (
+                  <Link key={item.name} href={item.href} className="text-purple-600 hover:text-purple-800 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">
+                    {item.name}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6">
-              <Link href="/login" className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-colors duration-300">
-                Sign In
-              </Link>
+              {session ? (
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-colors duration-300"
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <Link href="/login" className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-colors duration-300">
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
           <div className="-mr-2 flex md:hidden">
@@ -51,16 +82,26 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="/" className="text-purple-600 hover:text-purple-800 hover:bg-purple-100 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Home</Link>
-            <Link href="#objectives" className="text-purple-600 hover:text-purple-800 hover:bg-purple-100 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Objectives</Link>
-            <Link href="#current-needs" className="text-purple-600 hover:text-purple-800 hover:bg-purple-100 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Current Needs</Link>
-            <Link href="#why-substantial" className="text-purple-600 hover:text-purple-800 hover:bg-purple-100 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Why Substantial</Link>
+            {navItems.map((item) => (
+              <Link key={item.name} href={item.href} className="text-purple-600 hover:text-purple-800 hover:bg-purple-100 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">
+                {item.name}
+              </Link>
+            ))}
           </div>
           <div className="pt-4 pb-3 border-t border-purple-200">
             <div className="flex items-center px-5">
-              <Link href="/login" className="w-full bg-purple-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-purple-700 transition-colors duration-300">
-                Sign In
-              </Link>
+              {session ? (
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="w-full bg-purple-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-purple-700 transition-colors duration-300"
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <Link href="/login" className="w-full bg-purple-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-purple-700 transition-colors duration-300">
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         </div>

@@ -1,12 +1,12 @@
 import "@/styles/globals.css";
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider } from "next-auth/react";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import AIChatbot from '../components/AIChatbot';
 
-export default function App({ Component, pageProps: { session, ...pageProps } }) {
+function MyApp({ Component, pageProps }) {
   return (
-    <SessionProvider session={session}>
+    <SessionProvider session={pageProps.session}>
       <Navbar />
       <Component {...pageProps} />
       <Footer />
@@ -14,3 +14,5 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
     </SessionProvider>
   );
 }
+
+export default MyApp;

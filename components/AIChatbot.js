@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import OpenAI from "openai";
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 
 let openai;
 
@@ -15,6 +16,7 @@ const AIChatbot = () => {
   const chatWindowRef = useRef(null);
   const messagesEndRef = useRef(null);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const DEEPSEEK_API_KEY = process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY || '';
   const DEEPSEEK_API_ENDPOINT = process.env.NEXT_PUBLIC_DEEPSEEK_API_ENDPOINT || 'https://api.deepseek.com';
@@ -31,12 +33,14 @@ const AIChatbot = () => {
       dangerouslyAllowBrowser: true // Note: This is not recommended for production
     });
 
-    // Load prompt count from localStorage
-    const storedPromptCount = localStorage.getItem('promptCount');
-    if (storedPromptCount) {
-      setPromptCount(parseInt(storedPromptCount, 10));
+    // Load prompt count from localStorage only if user is not logged in
+    if (!session) {
+      const storedPromptCount = localStorage.getItem('promptCount');
+      if (storedPromptCount) {
+        setPromptCount(parseInt(storedPromptCount, 10));
+      }
     }
-  }, []);
+  }, [session]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -50,7 +54,7 @@ const AIChatbot = () => {
     e.preventDefault();
     if (inputMessage.trim() === '') return;
 
-    if (promptCount >= 3) {
+    if (!session && promptCount >= 3) {
       setMessages(prevMessages => [...prevMessages, 
         { text: inputMessage, sender: 'user' },
         { text: "You've reached the limit of free prompts. Please sign in to continue using the AI assistant.", sender: 'ai' }
@@ -65,7 +69,7 @@ const AIChatbot = () => {
     
     try {
       const aiResponse = await streamResponse(inputMessage);
-      if (aiResponse.trim() !== '') {
+      if (aiResponse.trim() !== '' && !session) {
         const newPromptCount = promptCount + 1;
         setPromptCount(newPromptCount);
         localStorage.setItem('promptCount', newPromptCount.toString());
@@ -174,7 +178,7 @@ const AIChatbot = () => {
   }, [isDragging]);
 
   const handleSignUp = () => {
-    router.push('/signup');
+    router.push('/login');
   };
 
   return (
@@ -240,13 +244,13 @@ const AIChatbot = () => {
                 </span>
               </div>
             )}
-            {promptCount >= 3 && (
+            {!session && promptCount >= 3 && (
               <div className="text-center mt-4">
                 <button 
                   onClick={handleSignUp}
                   className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors duration-300"
                 >
-                  Sign up to continue
+                  Sign in to continue
                 </button>
               </div>
             )}
@@ -258,16 +262,16 @@ const AIChatbot = () => {
                 type="text"
                 value={inputMessage}
                 onChange={handleInputChange}
-                placeholder={promptCount >= 3 ? "Sign up to continue..." : "Type your message..."}
+                placeholder={!session && promptCount >= 3 ? "Sign in to continue..." : "Type your message..."}
                 className="flex-grow px-3 py-2 border border-purple-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-purple-900"
-                disabled={promptCount >= 3}
+                disabled={!session && promptCount >= 3}
               />
               <button
                 type="submit"
                 className={`bg-purple-600 text-white px-4 py-2 rounded-r-lg transition-colors duration-300 ${
-                  promptCount >= 3 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-700'
+                  !session && promptCount >= 3 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-700'
                 }`}
-                disabled={promptCount >= 3}
+                disabled={!session && promptCount >= 3}
               >
                 Send
               </button>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ export default function Signup() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -49,17 +51,8 @@ export default function Signup() {
         });
 
         if (res.ok) {
-          const result = await signIn('credentials', {
-            redirect: false,
-            email: formData.email,
-            password: formData.password,
-          });
-
-          if (result.error) {
-            setErrors({ submit: result.error });
-          } else {
-            router.push('/');
-          }
+          // Signup successful, redirect to login page
+          router.push('/login?signup=success');
         } else {
           const data = await res.json();
           setErrors({ submit: data.error || 'Something went wrong' });

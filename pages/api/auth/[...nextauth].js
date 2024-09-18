@@ -1,9 +1,9 @@
-import NextAuth from 'next-auth'
-import GoogleProvider from "next-auth/providers/google"
-import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
-import clientPromise from "../../../lib/mongodb"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { compare } from 'bcryptjs'
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
+import clientPromise from "../../../lib/mongodb";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { compare } from 'bcryptjs';
 
 export default NextAuth({
   providers: [
@@ -37,21 +37,23 @@ export default NextAuth({
   ],
   adapter: MongoDBAdapter(clientPromise),
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id = user.id;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id
-      return session
-    }
+      session.user.id = token.id;
+      return session;
+    },
   },
   pages: {
     signIn: '/login',
   },
-})
+  secret: process.env.NEXTAUTH_SECRET,
+});
