@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 body {
-  @apply text-foreground min-h-screen;
+  color: var(--foreground);
+  min-height: 100vh;
 }
 
 @layer utilities {

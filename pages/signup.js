@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 
@@ -11,18 +11,43 @@ export default function Signup() {
     agreeTerms: false
   });
 
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: type === 'checkbox' ? checked : value
     }));
+    // Clear error when user starts typing
+    setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
+  };
+
+  const validateForm = () => {
+    let newErrors = {};
+    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.email) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+    if (!formData.password) newErrors.password = 'Password is required';
+    else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+    if (!formData.agreeTerms) newErrors.agreeTerms = 'You must agree to the terms and conditions';
+    return newErrors;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log(formData);
+    setIsSubmitting(true);
+    const newErrors = validateForm();
+    if (Object.keys(newErrors).length === 0) {
+      // Form is valid, proceed with signup
+      console.log('Form is valid, submitting:', formData);
+      // Add your signup logic here
+    } else {
+      setErrors(newErrors);
+    }
+    setIsSubmitting(false);
   };
 
   const handleGoogleSignup = () => {
@@ -40,20 +65,20 @@ export default function Signup() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div className="animate-slide-up">
-              <label htmlFor="name" className="sr-only">Full Name</label>
-              <input id="name" name="name" type="text" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Full Name" value={formData.name} onChange={handleChange} />
+              <input id="name" name="name" type="text" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Full Name" value={formData.name} onChange={handleChange} />
+              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
             <div className="animate-slide-up" style={{animationDelay: '0.1s'}}>
-              <label htmlFor="email-address" className="sr-only">Email address</label>
-              <input id="email-address" name="email" type="email" autoComplete="email" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Email address" value={formData.email} onChange={handleChange} />
+              <input id="email-address" name="email" type="email" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Email address" value={formData.email} onChange={handleChange} />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
             <div className="animate-slide-up" style={{animationDelay: '0.2s'}}>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input id="password" name="password" type="password" autoComplete="new-password" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Password" value={formData.password} onChange={handleChange} />
+              <input id="password" name="password" type="password" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Password" value={formData.password} onChange={handleChange} />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
             <div className="animate-slide-up" style={{animationDelay: '0.3s'}}>
-              <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
-              <input id="confirm-password" name="confirmPassword" type="password" autoComplete="new-password" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} />
+              <input id="confirm-password" name="confirmPassword" type="password" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} />
+              {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
             </div>
           </div>
 
@@ -63,10 +88,11 @@ export default function Signup() {
               I agree to the <Link href="/terms" className="font-medium text-purple-600 hover:text-purple-500">Terms</Link> and <Link href="/privacy" className="font-medium text-purple-600 hover:text-purple-500">Privacy Policy</Link>
             </label>
           </div>
+          {errors.agreeTerms && <p className="text-red-500 text-xs mt-1">{errors.agreeTerms}</p>}
 
           <div className="animate-fade-in" style={{animationDelay: '0.5s'}}>
-            <button type="submit" className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300">
-              Sign up
+            <button type="submit" className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing up...' : 'Sign up'}
             </button>
           </div>
         </form>

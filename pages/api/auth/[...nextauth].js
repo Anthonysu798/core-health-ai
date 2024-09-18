@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth';
-import GoogleProvider from '@auth/google-provider';
+import GoogleProvider from "next-auth/providers/google";
 
 export default NextAuth({
   providers: [

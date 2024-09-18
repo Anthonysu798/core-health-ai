@@ -9,26 +9,40 @@ export default function Login() {
     rememberMe: false
   });
 
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: type === 'checkbox' ? checked : value
     }));
+    // Clear error when user starts typing
+    setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
+  };
+
+  const validateForm = () => {
+    let newErrors = {};
+    if (!formData.email) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+    if (!formData.password) newErrors.password = 'Password is required';
+    return newErrors;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log(formData);
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    // Perform login logic here
-    // If login is successful:
-    localStorage.removeItem('promptCount');
-    // Redirect to home page or dashboard
+    setIsSubmitting(true);
+    const newErrors = validateForm();
+    if (Object.keys(newErrors).length === 0) {
+      // Form is valid, proceed with login
+      console.log('Form is valid, submitting:', formData);
+      // Add your login logic here
+      localStorage.removeItem('promptCount');
+    } else {
+      setErrors(newErrors);
+    }
+    setIsSubmitting(false);
   };
 
   const handleGoogleLogin = () => {
@@ -46,12 +60,12 @@ export default function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div className="animate-slide-up">
-              <label htmlFor="email-address" className="sr-only">Email address</label>
-              <input id="email-address" name="email" type="email" autoComplete="email" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Email address" value={formData.email} onChange={handleChange} />
+              <input id="email-address" name="email" type="email" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Email address" value={formData.email} onChange={handleChange} />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
             <div className="animate-slide-up" style={{animationDelay: '0.1s'}}>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input id="password" name="password" type="password" autoComplete="current-password" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Password" value={formData.password} onChange={handleChange} />
+              <input id="password" name="password" type="password" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Password" value={formData.password} onChange={handleChange} />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
           </div>
 
@@ -71,8 +85,8 @@ export default function Login() {
           </div>
 
           <div className="animate-fade-in" style={{animationDelay: '0.3s'}}>
-            <button type="submit" className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300">
-              Sign in
+            <button type="submit" className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>

@@ -5,7 +5,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky-nav">
+    <nav className="sticky top-0 z-50 bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -23,9 +23,9 @@ const Navbar = () => {
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6">
-              <button className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-colors duration-300">
+              <Link href="/login" className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-colors duration-300">
                 Sign In
-              </button>
+              </Link>
             </div>
           </div>
           <div className="-mr-2 flex md:hidden">
@@ -58,9 +58,9 @@ const Navbar = () => {
           </div>
           <div className="pt-4 pb-3 border-t border-purple-200">
             <div className="flex items-center px-5">
-              <button className="w-full bg-purple-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-purple-700 transition-colors duration-300">
+              <Link href="/login" className="w-full bg-purple-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-purple-700 transition-colors duration-300">
                 Sign In
-              </button>
+              </Link>
             </div>
           </div>
         </div>
