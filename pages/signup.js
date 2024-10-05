@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import Link from 'next/link';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function Signup() {
   const [formData, setFormData] = useState({

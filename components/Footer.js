@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="bg-purple-100 text-purple-900 p-4">
+    <footer className="bg-purple-100 text-purple-900 p-3">
       <div className="container mx-auto text-center">
         <p>&copy; 2023 Core Health AI. All rights reserved.</p>
       </div>
